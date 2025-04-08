@@ -8,11 +8,24 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final TextEditingController _controllerTarefa = TextEditingController();
+  final List<String> _tarefas = [];
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
+    void _addTarefa() {
+      if (_formKey.currentState!.validate()) {
+        setState(() {
+          _tarefas.add(_controllerTarefa.text);
+          _controllerTarefa.clear();
+        });
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Minha lista', style: TextStyle(color: Colors.white)),
+        title: Text('Minha Lista', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.blue,
       ),
       body: Column(
@@ -20,14 +33,63 @@ class _HomePageState extends State<HomePage> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Form(
+              autovalidateMode: AutovalidateMode.disabled,
+              key: _formKey,
               child: TextFormField(
+                controller: _controllerTarefa,
                 decoration: InputDecoration(
-                  labelText: 'Digite um item',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
+                  labelText: 'Digite uma tarefa',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Preencha o campo corretamente';
+                  }
+                  if (value.length < 3) {
+                    return 'Digite ao menos 3 caracteres';
+                  }
+                  return null;
+                },
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: _addTarefa,
+            child: Container(
+              margin: EdgeInsets.only(left: 8, right: 8),
+              width: double.infinity,
+              height: 30,
+              color: Colors.blue,
+              child: Center(
+                child: Text(
+                  'Cadastrar',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
+            ),
+          ),
+          ElevatedButton(onPressed: _addTarefa, child: Text('Cadastrar')),
+
+          Expanded(
+            child: ListView.builder(
+              itemCount: _tarefas.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  leading: Image.network(
+                    'https://cdn-icons-png.flaticon.com/512/9709/9709605.png',
+                  ),
+                  title: Text(
+                    _tarefas[index],
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text('Mais informações'),
+                  trailing: Icon(Icons.more),
+                  dense: true,
+                );
+              },
             ),
           ),
         ],
